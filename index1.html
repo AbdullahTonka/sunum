@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Tracking</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Location Tracking</h1>
+    <p id="distance">Distance: </p>
+    <p id="userLocation">User Location: </p>
+
+    <script>
+        let targetLocation = {
+            latitude: 41.074387, // Hedef konumun enlem bilgisi
+            longitude: 28.699405 // Hedef konumun boylam bilgisi
+        };
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371e3; // Earth radius in meters
+            const φ1 = lat1 * Math.PI / 180;
+            const φ2 = lat2 * Math.PI / 180;
+            const Δφ = (lat2 - lat1) * Math.PI / 180;
+            const Δλ = (lon2 - lon1) * Math.PI / 180;
+
+            const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            const distance = R * c;
+            return distance;
+        }
+
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude
+                        };
+
+                        const distance = calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            targetLocation.latitude,
+                            targetLocation.longitude
+                        );
+
+                        document.getElementById('distance').textContent = `Distance: ${distance.toFixed(2)} meters`;
+                        document.getElementById('userLocation').textContent = `User Location: ${userLocation.latitude.toFixed(6)}, ${userLocation.longitude.toFixed(6)}`;
+
+                        if (distance < 30) {
+                            alert('You are within 30 meters of the target location!');
+                        }
+                    },
+                    (error) => {
+                        console.error(error);
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        setInterval(getLocation, 500); // Her 5 saniyede bir konumu kontrol et
+
+    </script>
+</body>
+</html>
